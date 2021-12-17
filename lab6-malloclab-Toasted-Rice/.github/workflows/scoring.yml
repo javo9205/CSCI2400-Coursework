@@ -1,0 +1,27 @@
+name: scoring
+on: [push]
+jobs:
+  scoring:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: prepare
+        uses: actions/checkout@v2
+      - name: specify python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+      - name: prepare to build
+        run: make clean
+      - name: build
+        run: make
+      - name: run grading evaluation 1
+        run: python3 ./grade-malloc.py
+      - name: run grading evaluation 2
+        run: python3 ./grade-malloc.py
+      - name: prepare grading artifact
+        run: python3 ./grade-malloc.py > grading-output.txt
+      - name: Copy grade artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: grading-output.txt
+          path: ./grading-output.txt

@@ -1,0 +1,13 @@
+name: grade-first-set
+on: [push]
+jobs:
+  run-ctarget-l1:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: make grade-ctarget.l1.txt
+  run-ctarget-l2:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: make grade-ctarget.l2.txt

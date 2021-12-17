@@ -1,0 +1,796 @@
+x/=================================
+Phase 2
+=================================
+callq <read_six_numbers>
+ - Store number of arguments in rax
+ - Values stored in stack (0x0 to 0x24)
+
+cmpl $0x0,(%rsp)
+ - Compare first read number with zero
+  
+js <explode_bomb>
+ - explode bomb if negative
+ 
+mov $0x1, $ebx
+ - int i=1;
+
+mov %rsp, %rbp
+ - Store stack address into base pointer
+ 
+jmp <phase_2+47>
+ - Start loop
+ 
+mov %ebx,%eax
+ - int x = i;
+ 
+add -0x4(%rbp,%rbx,4),%eax
+ - x += input[i-1];
+ 
+cmp %eax,0x0(%rbp,%rbx,4)
+ - Compare 'x' to input[i]
+
+je <phase_2+37>
+ - if (x==input[1])
+ -     continue;
+ - else explode_bomb
+ 
+add $0x1,%rbx
+ - i++
+ 
+cmp $0x6,%rbx
+ - compare 6 to i
+ 
+je <phase_2+66>
+ - Exit loop if (i==6)
+
+
+
+
+TRANSLATION INTO C-CODE:
+
+int input[6];
+sscanf(cin,"%d %d %d %d %d %d", input)
+
+for(int i=1; i++; i<6) {
+    int x = i;
+    x += input[i-1];
+    if (x != input[i])
+        explode_bomb()
+}
+
+
+
+
+VALID INPUTS:
+x0 >= 0
+x1 == 1 + x0
+x2 == 2 + x1
+x3 == 3 + x2
+x4 == 4 + x3
+x5 == 5 + x4
+
+x0 >= 0
+x1 == x0 + 1
+x2 == x0 + 3
+x3 == x0 + 6
+x4 == x0 + 10
+x5 == x0 + 15
+
+*** We can use any number >= 0 for the first number 
+*** as long as we follow the above equations for the
+*** rest of the 5 inputs.
+
+
+
+
+
+=================================
+Phase 3
+=================================
+sub $0x18,$rsp
+ - Reserve 24 bytes on the stack
+ 
+lea 0x8(%rsp),%rcx
+ - First argument will be stored at 0x8(stack)
+ - Making room by storing existing data into rcx
+ 
+lea 0xc(%rsp),%rdx
+ - Second argument will be stored at 0xc(stack)
+ - Making room by storing existing data into rdx
+ 
+lea 0x187c(%rip),%rsi
+ - Obtain read format string ("%d %d")
+ 
+callq <sscanf>
+ - Read input
+
+cmp $0x1,%eax
+ - Compare number of read inputs to 1
+ 
+jle <phase_3+63>
+ - if(len(input)) <= 1) explode_bomb
+ 
+cmpl $0x7,0xc($rsp)
+ - Compare 7 with first argument
+
+ja <phase_3+119>
+ - if(input[0] > 7) explode_bomb
+ - comparison is unsigned
+ - 0 <= input[0] < 7
+ 
+mov 0xc(%rsp),%eax
+ - int x = input[0]
+
+lea 0x162d(%rip),%rdx)
+ - Loading jump table from memory
+ 
+movslq (%rdx,%rax,4),%rax 
+add %rdx,%rax
+ - ???
+
+jmpq *%rax
+ - switch(x)
+
+case 0: x = 0x133;    x = 307
+case 1: x = 0x122;    x = 290
+case 2: x = 0x2ec;    x = 748
+case 3: x = 0x3cd;    x = 937
+case 4: x = 0x5a;     x = 90
+case 5: x = 0x27d;    x = 637
+case 6: x = 0x107;    x = 263
+case 7: x = 0x24f;    x = 591
+default: x = explode_bomb()
+
+jmp <phase_3+136>
+ - exit switch
+
+cmp %eax,0x8(%rsp)
+ - compare x with second argument
+ 
+je <phase_3+147>
+callq <explod_bomb>
+ - if (x != arg2) explode_bomb
+
+
+
+
+TRANSLATION INTO C-CODE:
+
+int input[2]
+sscanf(cin, "%d %d", input)
+int x = input[0]
+switch (x)
+{
+    case 0: x = 307; break;
+    case 1: x = 290; break;
+    case 2: x = 748; break;
+    case 3: x = 937; break;
+    case 4: x = 90;  break;
+    case 5: x = 637; break;
+    case 6: x = 263; break;
+    case 7: x = 591; break;
+    default: explode_bomb();
+}
+if (input[1] != x) explode_bomb();
+
+
+
+
+VALID INPUTS:
+0   307
+1   290
+2   7748
+3   937
+4   90
+5   637
+6   263
+7   591
+
+
+
+
+=================================
+Phase 4
+=================================
+sub %0x18,%rsp
+ - Reserve 24 bytes on the stack
+
+lea 0x8(%rsp),%rcx
+ - Make room at stack+8 for arg2
+ 
+lea 0xc(%rsp),%rdx
+ - Make room at stack+12 for arg1
+ 
+lea 0x17b7(%rip),%rsi
+ - Fetch input string memory ("%d %d")
+
+mov $0x0, %eax
+ - int x = 0
+
+callq <sscanf>
+ - x = sscanf(cin, "%d %d", input)
+ 
+cmp $0x2, %eax
+jne <phase_4+43>
+cmpl $0xe,0xc(%rsp)
+jbe <phase_4+48>
+callq <explode_bomb>
+ - if (x != 2 || input[0] > 14) explode_bomb()
+ 
+mov $0xe,%edx
+ - int var3 = 14;
+
+mov $0x0,$esi
+ - int var2 = 0;
+
+mov 0xc(%rsp),%edi
+ - int var1 = input[0]
+
+callq <func4>
+ - int result = func4( input[0], 0, 14)
+
+cmp $0x7,%eax
+jne <phase_4+79>
+cmpl $0x7,0x8(%rsp)
+je <phase_4+84>
+callq <explode_bomb>
+- if (result != 7 || input[1] != 7) explode_bomb()
+
+add $0x18,%rsp
+retq
+ - free 24 bytes on stack and return
+
+-----------------
+func4
+-----------------
+push %rbx
+mov %edx,%ebx
+ - int x = c
+ 
+sub %esi,%ebx
+ - x -= b
+
+shr %ebx
+ - x >>= 1
+
+add %esi,%ebx
+ - x += b
+
+cmp %edi,%ebx
+ja <func4+21>
+ - if (x > a) //do something
+ 
+cmp %edi,%ebx
+jb <func4+33>
+ - if (x < a) //do something
+
+mov %ebx,%eax
+pop %rbx
+retq
+ - int result = x
+ - return result
+ 
+ 
+-----------------
+func4+21
+-----------------
+lea -0x1(%rbx),%edx
+ - c = x - 1
+
+callq <func4>
+ - int result = func4( a, b, c )
+
+add %eax,%ebx
+ - x += result
+
+jmp <func4+17>
+mov %ebx,%eax
+pop %rbx
+retq
+ - result = x
+ - return result
+
+-----------------
+func4+33
+-----------------
+lea 0x1(%rbx),%esi
+ - b = x + 1
+
+callq <func4+17>
+ - int result = func4( a, b, c)
+
+jmp <func4+17>
+mov %ebx,%eax
+pop %rbx
+retq
+ - result = x
+ - return result
+ 
+ 
+ 
+ 
+ 
+TRANSLATION INTO C-CODE:
+
+func4(int a, int b, int c) {
+    int x = c;
+    
+    x -= b;
+    x /= 2;    //integer division
+    x += b;
+    
+    if (x > a) x += func4( a, b, x-1 )
+    if (x < a) x += func4( a, x+1, c )
+    return x;
+{
+
+phase_4() {
+    int input[2]
+    int x = sscanf(cin, "%d %d", input)
+    if (x != 2 || input[0] > 14)
+        explode_bomb()
+    
+    int result = func4 ( input[0], 0, 14 )
+    if (result != 7 || input[1] != 7)
+        explode_bomb()
+   
+   return;
+}
+
+*** x only increases as shown by x += func4(---)
+*** In the first iteration, b = 0, so x = c/2 = 14/2 = 7
+*** Ultimately we want x=7, so if we make sure func4 doesn't
+*** called again, we can defuse phase_4.
+
+
+
+
+VALID INPUTS:
+7 7
+
+
+
+
+=================================
+Phase 5
+=================================
+sub %0x18,%rsp
+ - Reserve 24 bytes on the stack
+
+lea 0x8(%rsp),%rcx
+ - Make room at stack+8 for arg2
+ 
+lea 0xc(%rsp),%rdx
+ - Make room at stack+12 for arg1
+ 
+lea 0x175e(%rip),%rsi
+ - Fetch input format string memory ("%d %d")
+ 
+mov $0x0,%eax
+callq <sscanf>
+ - int x = sscanf(cin, "%d %d", input)
+
+cmp $0x1,%eax
+jle <phase_5+113>
+ - if (x <= 1) explode_bomb()
+
+mov 0xc(%rsp),%eax
+ - x = input[0]
+
+and $0xf,%eax
+ - x %= 16
+
+mov %eax,0xc(%rsp)
+ - input[0] = x
+
+cmp $0xf,%eax
+je <phase_5+103>
+ - if (x == 15) explode_bomb()
+
+mov $0x0,%ecx
+mov %0x0,%edx
+ - int c = 0
+ - int d = 0
+
+lea 0x1520(%rip),%rsi
+ - pulling data from memory
+ - Used command (x/16dw $rsi) to inspect array
+ - int b[16] =
+   {
+       10, 2, 14, 7,
+       8, 12, 15, 11,
+       0, 4, 1, 13,
+       3, 9, 6, 5
+   }
+
+add $0x1,%edx
+ - c++
+
+cltq
+ - long c = c
+
+mov (%rsi,%rax,4), %eax
+ - x = d[x]
+
+add %eax,%ecx
+ - d += x
+
+cmp $0xf,%eax
+jne <phase_5+69>
+ - while(x != 15) goto line_404
+
+movl $0xf,0xc($rsp)
+ - input[0] = 15
+
+cmp $0xf,%edx
+jne <phase_5+103>
+ - if (c != 15) explode_bomb()
+
+cmp %ecx,0x8(%rsp)
+je <phase5+108>
+callq <explode_bomb>
+ - if (d != input[1]) explode_bomb()
+
+add $0x18,$rsp
+retq
+ - Free 24B on stack and return
+ 
+ 
+ 
+ 
+ 
+TRANSLATION INTO C-CODE:
+
+phase_5()
+{
+    int input[2];
+    if (sscanf(cin,"%d %d", input) <= 1)
+        explode_bomb();
+    
+    int x = input[0] % 16;
+    if (x == 15)
+        explode_bomb();
+    
+    int count = 0
+    int sum = 0
+    int array[16] = 
+    {
+        10, 2, 14, 7,
+        8, 12, 15, 11,
+        0, 4, 1, 13,
+        3, 9, 6, 5
+    }
+    
+   while (x != 15) {
+       count++;
+       x = array[x]
+       sum += x;
+   }
+   
+   if (count != 15 || sum != input[1])
+       explode_bomb();
+   
+   return;
+}
+
+*** Every element of the array references another element,
+*** and we exit the loop when the number 15 has been reached.
+*** Additionally the bomb will explode unless we've looped
+*** 15 times or if our the sum of elements visited does not
+*** equal our second argument. Therefore we just need to follow
+*** the elements going backward from 15 until there is only one
+*** element left. Then our second value will be the sum of the
+*** numbers from 0 to 15 less the remaining element
+
+15 =  6th index - 1
+ 6 = 14th index - 2
+14 =  2nd index - 3
+ 2 =  1st index - 4
+ 1 = 10th index - 5
+10 =  0th index - 6
+ 0 =  8th index - 7
+ 8 =  4th index - 8
+ 4 =  9th index - 9
+ 9 = 13th index - 10
+13 = 11th index - 11
+11 =  7th index - 12
+ 7 =  3rd index - 13
+ 3 = 12th index - 14
+12 =  5th index - 15
+ 5 = 15th index - 16   <<<   Element that will be left out
+ 
+*** In retrospect, it's obvious that the last element
+*** will be the element left out since we would never
+*** run the line x = array[15]; sum += x;
+
+
+
+
+
+VALID INPUTS:
+Arg1
+= array[15] * 16n
+= 5 * 16n, where n is a natural number that doesn't cause overflow
+
+Arg2
+= Sum(n=15,i=1) - array[15]
+= (15/2)(15+1) - 5
+= (15)(8) - 5
+= 120 - 5
+= 115
+
+12 115
+28 115
+44 115
+...
+21397 115
+
+
+
+
+=================================
+Phase 6
+=================================
+push %r13
+push %r12
+push $rbp
+push %rbx
+sub $0x58,$rsp
+ - Reserve 4 registers and 88 bytes on the stack
+
+lea 0x30($rsp),%r12
+mov %r12,%rsi
+callq <read_six_numbers>
+ - Read 6 numbers from cin
+ - input is stored into %r12
+
+mov $0x0,%r13d
+ - int r13 = 0   >>>   int i = 0
+
+jmp <phase_6+69>
+
+------------------------------------
+<phase_6+69>
+
+mov %r12,%rbp
+ - Store input ref into rbp
+ 
+mov (%r12),%eax
+sub $0x1,%eax
+ - int x = input[0] - 1;
+
+cmp %0x5,%eax
+ja <phase_6+31>
+ - if (x > 5) explode_bomb()
+
+add $0x1,%r13d
+cmp $0x6,%r13d
+je  <phase_6+147>
+ - for(int i=1; i<6; i++) //do stuff
+
+mov %r13d,%ebx
+ - int j = i;
+ 
+jmp <phase_6+46>
+
+------------------------------------
+<phase_6+46>
+movslq %ebx,%rax
+ - int x = j;
+
+mov 0x30(%rsp,%rax,4),%eax
+ - x = input[x]   >>>   x = input[j];
+
+cmp %eax,0x0(%rbp)
+jne <phase_6+38>
+callq <explode_bomb>
+ - if (x == input[i]) explode_bomb()
+
+------------------------------------
+<phase_6+38>
+add $0x1,%ebx
+cmp $0x5,%ebx
+jg <phase_6+65>
+ - for(int j=i+1; j<6; j++) //do stuff
+
+next line: <phase_6+46>
+
+------------------------------------
+<phase_6+65>
+add $0x4,%r12
+ - r12 += 4
+
+next line: <phase_6+65>
+
+------------------------------------
+>END BOTH FOR LOOPS
+>START NEXT FOR LOOP
+------------------------------------
+<phase_6+147>
+
+mov $0x0,$esi
+ - int i = 0;
+
+jmp <phase_6+124>
+
+------------------------------------
+<phase_6+124>
+
+mov 0x30($rsp,%rsi,4),%ecx
+ - int y = input[i]
+
+mov $0x1,%eax
+ - int j = 1
+
+lea 0x203231(%rip),%rdx  # <node1>
+ - Fetch linked list from memory
+ - node *root = node1;
+
+cmp $0x1,%ecx
+jg <phase_6+99>
+jmp <phase_6+110>
+if (i > 1) goto +99; else goto +110;
+
+------------------------------------
+<phase_6+99>
+
+mov 0x8(%rdx),%rdx
+ - root = root->next
+
+add $0x1,$eax
+cmp %ecx,%eax
+jne <phase_6+99>
+ - for (int j=0; j<y; j++) goto +99;
+
+next line: <phase_6+110>
+
+------------------------------------
+<phase_6+110>
+
+mov %rdx,(%rsp,%rsi,8)
+ - save node pointer on stack[i]
+
+add $0x1,%rsi
+cmp $0x6,%rsi
+je  <phase_6+154>
+ - for (int i=0; i++; i<6)
+
+next line: <phase_6+124>
+
+------------------------------------
+<phase_6+154>
+mov (%rsp),%rbx
+ - node *a = stack[0]
+
+mov $0x8(%rsp),%rax
+ - node *b = stack[1]
+
+mov %rax,0x8(%rbx)
+ - a->next = b
+
+mov 0x10(%rsp),%rdx
+ - node *c = stack[2]
+
+mov %rdx,0x8(%rax)
+ - b-> next = c
+
+mov 0x18(%rsp),%rax
+ - b = stack[3]
+
+mov %rax,0x8(%rdx)
+ - c->next = b
+
+mov 0x20(%rsp),%rdx
+ - c = stack[4]
+
+mov %rdx,0x8(%rax)
+ - b->next = c
+
+mov 0x28(%rsp),%rax
+ - b = stack[5]
+
+mov %rax,0x8(%rdx)
+ - c->next = b;
+
+movq 0x0,0x8(%rax)
+ - b-> = null;
+
+mov 0x5,%ebp
+ - int i = 5;
+
+jmp <phase_6+227>
+
+------------------------------------
+<phase_6+227>
+mov 0x8(%rbx),%rax
+ - b = a->next
+
+mov (%rax),%eax
+cmp %eax,(%rbx)
+jle <phase_6+218>
+callq <explode_bomb>
+- if (a->data > b->data) explode_bomb();
+- else goto +218;
+
+------------------------------------
+<phase_6+218>
+mov 0x8(%rbx),%rbx
+ - b = b->next
+
+sub $0x1,%ebp
+je <phase_6+244>
+ - for (int i=5; i>0; i--)
+
+next line: <phase_6+227>
+------------------------------------
+
+<phase_6+244>
+add 0x58,%rsp
+pop %rbx
+pop %rbp
+pop %r12
+pop %r13
+retq
+ - Free up memory from stack
+
+
+
+
+
+TRANSLATION INTO C-CODE:
+
+phase_6()
+{
+    unsigned *input;
+    read_six_numbers(cin, input);
+    
+    // INPUT MUST CONTAIN ONE THROUGH SIX
+    for (int i=0; i<6; i++) {  
+        for(int j=i+1; j<6; j++)
+        {
+            if (input[j] - 1 > 5) explode_bomb()
+            if (input[j] == input[i]) explode_bomb();
+        }
+    }
+    
+    // ARRANGE NODES ON THE STACK BASED ON INPUT
+    node *stack[6]
+    for (int i=0; i<6; i++)
+    {
+        node *current = node1
+        for (int j=1; j<input[i]; j++)
+            current = current->next;
+        stack[i] = current;
+    }
+    
+    // HAVE EACH NODE ON THE STACK POINT TO THE NEXT
+    for (int i=0; i<5; i++)
+        stack[i]->next = stack[i+1]
+    stack[5]->next = null;
+    
+    // RUN THROUGH REARRANGED LIST. CHECK DATA FOR ASC ORDER
+    node *prev = stack[0]
+    for (int i=5; i>0; i--) 
+    {
+        node *next = prev->next;
+        if (prev->data > next->data) explode_bomb()
+        prev = next;
+    }
+    
+    return;
+}
+
+
+
+
+
+NODE DATA:
+452 1
+73  2
+721 3
+946 4
+171 5
+120 6
+
+VALID INPUTS:
+2 6 5 1 3 4

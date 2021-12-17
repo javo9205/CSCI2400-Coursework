@@ -1,0 +1,8 @@
+name: grade-extra-credit
+on: [push]
+jobs:
+  run-extra-credit:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: make grade-extra

@@ -1,0 +1,25 @@
+name: grading
+on: [push]
+jobs:
+  test-set:
+    runs-on: self-hosted
+    steps:
+      - name: prepare
+        uses: actions/checkout@v2
+      - name: specify python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+      - name: prepare to build
+        run: make clean
+      - name: build
+        run: make
+      - name: check python version
+        run: python3 --version
+      - name: run grading script
+        run: python3 ./shellAutograder.py | tee ./grading-output.txt
+      - name: Copy grade artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: grading-output.txt
+          path: ./grading-output.txt

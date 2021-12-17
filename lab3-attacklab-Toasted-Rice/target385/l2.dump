@@ -1,0 +1,9 @@
+
+l2.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <.text>:
+   0:	bf 07 47 8d 28       	mov    $0x288d4707,%edi
+   5:	c3                   	retq   

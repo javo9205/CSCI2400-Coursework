@@ -1,0 +1,8 @@
+name: grade-first-set
+on: [push]
+jobs:
+  run-first-set:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: make grade-first

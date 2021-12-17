@@ -1,0 +1,9 @@
+name: grade-extra-credit
+on: [push]
+jobs:
+  run-extra-credit:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: shogo82148/actions-setup-perl@v1
+      - run: perl driver.pl -g 13

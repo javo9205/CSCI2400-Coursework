@@ -1,0 +1,7 @@
+The three chief virtues of a programmer are: Laziness, Impatience and Hubris.
+1 2 4 8 16 32
+1 j 820
+6 21 DrEvil
+5 115
+4 6 1 2 3 5
+1001

@@ -1,0 +1,18 @@
+name: grade-rest
+on: [push]
+jobs:
+  run-ctarget-l3:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: make grade-ctarget.l3.txt
+  run-rtarget-l2:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: make grade-rtarget.l2.txt
+  run-rtarget-l3:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: make grade-rtarget.l3.txt

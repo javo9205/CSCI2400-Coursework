@@ -1,0 +1,62 @@
+--------------------------
+<phase_defused>
+--------------------------
+sub $0x98,%rsp
+ - Reserve 152 bytes on the stack
+
+cmpl $0x0,203053(%rip)    # <grade_bomb>
+je <phase_defused+33>
+ - Something about grading I guess...
+
+--------------------------
+<phase_defused+33>
+--------------------------
+mov $0x1,%edi
+callq <send_msg>
+jmp <phase_defused+16>
+
+--------------------------
+<phase_defused+16>
+--------------------------
+cmpl $0x6,0x203046(%rip)    # <num_input_strings>
+je <phase_defused+45>
+add $0x98,%rsp
+retq
+
+ - Will exit unless phase 6 has been completed
+
+--------------------------
+<phase_defused+45>
+--------------------------
+lea 0x8(%rsp),%rcx
+lea 0xc(%rsp),%rdx
+lea 0x10(%rsp),%r8
+ - Storing three ints from stack into args 3,4,5
+
+0x10db(%rip),%rsi
+ - Fetching input string into arg2 ("%d %d %s")
+
+0x20318f(%rip),%rdi    # <input_strings+360>
+ - Fetching previous input from phase 4
+
+mov $0x0,%eax
+ - Clearing output for next function call
+
+ callq <sscanf>
+ - Retrieves int, int, string from phase_4 input
+
+cmp $0x3,%eax
+je <phase_defused+124>
+ - Only jumps if there are 3 arguments
+
+--------------------------
+<phase_defused+124>
+--------------------------
+lea 0x10($rsp),$rdi
+lea 0x109f(%rip),%rsi)
+ - Fetches string argument and "DrEvil" string from memory
+
+callq <strings_not_equal>
+testq %eax,%eax
+jne <phase_defused+89>
+ - Exits if secret input is not DrEvil
